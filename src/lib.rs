@@ -59,6 +59,7 @@ impl Direction {
 impl Game {
     
     pub fn tick(&mut self, direction: Direction) {
+
         let mut next = self.cells.clone();
 
         let snake_head = self.snake.get(0).unwrap().clone();
@@ -77,51 +78,29 @@ impl Game {
             let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
             next[snake_tail_index] = Cell::Off;
         }
-
-        let new_snake_head = if self.snake.len() > 1 && self.direction.is_opposite(direction) {
-            match self.direction {
-                Direction::Up => (
-                    snake_head.0,
-                    (snake_head.1 - 1) % self.height,
-                ),
-                Direction::Down => (
-                    snake_head.0,
-                    (snake_head.1 + 1) % self.height,
-                ),
-                Direction::Right => (
-                    (snake_head.0 + 1) % self.width,
-                    snake_head.1,
-                ),
-                Direction::Left => (
-                    (snake_head.0 - 1) % self.width,
-                    snake_head.1,
-                ),
-            }
-        } else {
-
-            self.direction = direction;
-            
-            match direction {
-                Direction::Up => (
-                    snake_head.0,
-                    (snake_head.1 - 1) % self.height,
-                ),
-                Direction::Down => (
-                    snake_head.0,
-                    (snake_head.1 + 1) % self.height,
-                ),
-                Direction::Right => (
-                    (snake_head.0 + 1) % self.width,
-                    snake_head.1,
-                ),
-                Direction::Left => (
-                    (snake_head.0 - 1) % self.width,
-                    snake_head.1,
-                ),
-            }
-        };
-
         
+        if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
+            self.direction = direction;
+        }
+
+        let new_snake_head = match self.direction {
+            Direction::Up => (
+                snake_head.0,
+                (snake_head.1 - 1) % self.height,
+            ),
+            Direction::Down => (
+                snake_head.0,
+                (snake_head.1 + 1) % self.height,
+            ),
+            Direction::Right => (
+                (snake_head.0 + 1) % self.width,
+                snake_head.1,
+            ),
+            Direction::Left => (
+                (snake_head.0 - 1) % self.width,
+                snake_head.1,
+            ),
+        };
 
         let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
 
