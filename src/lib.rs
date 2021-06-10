@@ -43,6 +43,18 @@ impl Game {
     }
 }
 
+impl Direction {
+    fn is_opposite(&self, direction: Direction) -> bool {
+        match (self, direction) {
+            (Direction::Up, Direction::Down) => true,
+            (Direction::Down, Direction::Up) => true,
+            (Direction::Right, Direction::Left) => true,
+            (Direction::Left, Direction::Right) => true,
+            (_, _) => false
+        }
+    }
+}
+
 #[wasm_bindgen]
 impl Game {
     
@@ -52,11 +64,6 @@ impl Game {
         let snake_head = self.snake.get(0).unwrap().clone();
 
         if snake_head == self.food {
-
-            // let food_index = self.get_index(self.food.0, self.food.1);
-
-            // next[food_index] = Cell::Off;
-
             self.food = (
                 rand::thread_rng().gen_range(0..64),
                 rand::thread_rng().gen_range(0..64),
@@ -71,41 +78,50 @@ impl Game {
             next[snake_tail_index] = Cell::Off;
         }
 
-        // let snake_tail = self.snake.pop_back().unwrap();
+        let new_snake_head = if self.snake.len() > 1 && self.direction.is_opposite(direction) {
+            match self.direction {
+                Direction::Up => (
+                    snake_head.0,
+                    (snake_head.1 - 1) % self.height,
+                ),
+                Direction::Down => (
+                    snake_head.0,
+                    (snake_head.1 + 1) % self.height,
+                ),
+                Direction::Right => (
+                    (snake_head.0 + 1) % self.width,
+                    snake_head.1,
+                ),
+                Direction::Left => (
+                    (snake_head.0 - 1) % self.width,
+                    snake_head.1,
+                ),
+            }
+        } else {
 
-        // let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
-
-        // next[snake_tail_index] = Cell::Off;
-
-        // let snake = self.snake.get(0).unwrap();
-
-        // don't store a reference, just get the values out of
-
-        // let snake_index = self.get_index(snake.0, snake.1);
+            self.direction = direction;
+            
+            match direction {
+                Direction::Up => (
+                    snake_head.0,
+                    (snake_head.1 - 1) % self.height,
+                ),
+                Direction::Down => (
+                    snake_head.0,
+                    (snake_head.1 + 1) % self.height,
+                ),
+                Direction::Right => (
+                    (snake_head.0 + 1) % self.width,
+                    snake_head.1,
+                ),
+                Direction::Left => (
+                    (snake_head.0 - 1) % self.width,
+                    snake_head.1,
+                ),
+            }
+        };
 
         
-        // self.snake.pop_back();
-
-        // let snake_head = self.snake.get(0).unwrap();
-
-        let new_snake_head = match direction {
-            Direction::Up => (
-                snake_head.0,
-                (snake_head.1 - 1) % self.height,
-            ),
-            Direction::Down => (
-                snake_head.0,
-                (snake_head.1 + 1) % self.height,
-            ),
-            Direction::Right => (
-                (snake_head.0 + 1) % self.width,
-                snake_head.1,
-            ),
-            Direction::Left => (
-                (snake_head.0 - 1) % self.width,
-                snake_head.1,
-            ),
-        };
 
         let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
 
