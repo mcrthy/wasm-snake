@@ -62,6 +62,10 @@ impl Game {
 
         let mut next = self.cells.clone();
 
+        if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
+            self.direction = direction;
+        }
+
         let snake_head = self.snake.get(0).unwrap().clone();
 
         if snake_head == self.food {
@@ -77,10 +81,6 @@ impl Game {
             let snake_tail = self.snake.pop_back().unwrap();
             let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
             next[snake_tail_index] = Cell::Off;
-        }
-        
-        if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
-            self.direction = direction;
         }
 
         let new_snake_head = match self.direction {
