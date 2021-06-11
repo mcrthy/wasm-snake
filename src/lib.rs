@@ -3,6 +3,7 @@ mod utils;
 use wasm_bindgen::prelude::*;
 use rand::Rng;
 use std::collections::VecDeque;
+use indexmap::IndexSet;
 
 extern crate web_sys;
 
@@ -66,7 +67,6 @@ impl Direction {
 
 #[wasm_bindgen]
 impl Game {
-    
     pub fn tick(&mut self, direction: Direction) {
 
         let snake_head = self.snake.get(0).unwrap().clone();
@@ -112,15 +112,22 @@ impl Game {
 
         if snake_head == self.food {
 
-            // TODO: Fix this horrible inefficiency
-            loop {
-                self.food = (
-                    rand::thread_rng().gen_range(0..64),
-                    rand::thread_rng().gen_range(0..64),
-                );
+            let exclude_x:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
+            let exclude_y:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
 
-                if !self.snake.contains(&self.food) { break; }
-            }
+            let width:IndexSet<u32> = (0..self.width).collect();
+            let height:IndexSet<u32> = (0..self.height).collect();
+
+            let valid_x:IndexSet<u32> = width.difference(&exclude_x).cloned().collect();
+            let valid_y:IndexSet<u32> = height.difference(&exclude_y).cloned().collect();
+
+            let valid_x_index = rand::thread_rng().gen_range(0..valid_x.len());
+            let valid_y_index = rand::thread_rng().gen_range(0..valid_y.len());
+
+            self.food = (
+                valid_x[valid_x_index],
+                valid_y[valid_y_index],
+            );
 
             let food_index = self.get_index(self.food.0, self.food.1);
 
