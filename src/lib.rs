@@ -4,6 +4,15 @@ use wasm_bindgen::prelude::*;
 use rand::Rng;
 use std::collections::VecDeque;
 
+extern crate web_sys;
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
+
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
@@ -60,13 +69,46 @@ impl Game {
     
     pub fn tick(&mut self, direction: Direction) {
 
+        let snake_head = self.snake.get(0).unwrap().clone();
+
+        if self.snake.len() > 4 && self.snake.range(4..).cloned().collect::<VecDeque<_>>().contains(&snake_head) {
+
+            let mut snake = VecDeque::new();
+
+            snake.push_back((
+                (self.width - 1) / 2,
+                (self.height - 1) / 2,
+            ));
+            
+            let food = (
+                10,
+                10,
+            );
+
+            let cells = (0..self.width * self.height)
+            .map(|i| {
+                if i == (snake.get(0).unwrap().1 * self.width + snake.get(0).unwrap().0) 
+                || i == (food.1 * self.width + food.0) {
+                    Cell::On
+                } else {
+                    Cell::Off
+                }
+            })
+            .collect();
+
+            self.snake = snake;
+            self.food = food;
+            self.direction = Direction::Up;
+            self.cells = cells;
+
+            return;
+        }
+
         let mut next = self.cells.clone();
 
         if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
             self.direction = direction;
         }
-
-        let snake_head = self.snake.get(0).unwrap().clone();
 
         if snake_head == self.food {
 
@@ -118,6 +160,8 @@ impl Game {
     }
 
     pub fn new() -> Game {
+        utils::set_panic_hook();
+
         let width: u32 = 64;
         let height: u32 = 64;
 
