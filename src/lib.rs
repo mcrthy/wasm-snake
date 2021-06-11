@@ -69,10 +69,16 @@ impl Game {
         let snake_head = self.snake.get(0).unwrap().clone();
 
         if snake_head == self.food {
-            self.food = (
-                rand::thread_rng().gen_range(0..64),
-                rand::thread_rng().gen_range(0..64),
-            );
+
+            // TODO: Fix this horrible inefficiency
+            loop {
+                self.food = (
+                    rand::thread_rng().gen_range(0..64),
+                    rand::thread_rng().gen_range(0..64),
+                );
+
+                if !self.snake.contains(&self.food) { break; }
+            }
 
             let food_index = self.get_index(self.food.0, self.food.1);
 
