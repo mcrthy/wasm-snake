@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use rand::Rng;
 use std::collections::VecDeque;
 use indexmap::IndexSet;
-use cgmath::Vector2;
+use itertools::Itertools;
 
 
 extern crate web_sys;
@@ -47,6 +47,7 @@ pub struct Game {
     food: (u32, u32),
     direction: Direction,
     cells: Vec<Cell>,
+    points: IndexSet<(u32, u32)>,
 }
 
 impl Game {
@@ -55,22 +56,15 @@ impl Game {
     }
 
     fn process_food(&mut self) {
-        let excluded_xs:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
-        let excluded_ys:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
+        let excluded_points:IndexSet<(u32, u32)> = self.snake.iter()
+        .map( |(x,y)| {
+            (*x, *y)
+        }).collect();
 
-        let width:IndexSet<u32> = (0..self.width).collect();
-        let height:IndexSet<u32> = (0..self.height).collect();
+        let possible_points:IndexSet<(u32, u32)> = self.points.difference(&excluded_points).cloned().collect();
 
-        let valid_xs:IndexSet<u32> = width.difference(&excluded_xs).cloned().collect();
-        let valid_ys:IndexSet<u32> = height.difference(&excluded_ys).cloned().collect();
-
-        let valid_x_index = rand::thread_rng().gen_range(0..valid_xs.len());
-        let valid_y_index = rand::thread_rng().gen_range(0..valid_ys.len());
-
-        self.food = (
-            valid_xs[valid_x_index],
-            valid_ys[valid_y_index],
-        );
+        let valid_food_location = rand::thread_rng().gen_range(0..possible_points.len());
+        self.food = possible_points[valid_food_location];
 
         let food_index = self.get_index(self.food.0, self.food.1);
         self.cells[food_index] = Cell::On;
@@ -175,6 +169,8 @@ impl Game {
             })
             .collect();
         
+        let points:IndexSet<(u32, u32)> = (0..width).cartesian_product(0..height).collect();
+        
         let mut snake = VecDeque::new();
         snake.push_back(snake_starting_point);
 
@@ -185,6 +181,7 @@ impl Game {
             food,
             direction,
             cells,
+            points,
         }
     }
 
