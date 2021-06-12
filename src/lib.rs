@@ -64,6 +64,64 @@ impl Game {
 
         hittable_segment.contains(&head)
     }
+
+    fn process_food(&mut self) {
+        let excluded_xs:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
+        let excluded_ys:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
+
+        let width:IndexSet<u32> = (0..self.width).collect();
+        let height:IndexSet<u32> = (0..self.height).collect();
+
+        let valid_xs:IndexSet<u32> = width.difference(&excluded_xs).cloned().collect();
+        let valid_ys:IndexSet<u32> = height.difference(&excluded_ys).cloned().collect();
+
+        let valid_x_index = rand::thread_rng().gen_range(0..valid_xs.len());
+        let valid_y_index = rand::thread_rng().gen_range(0..valid_ys.len());
+
+        self.food = (
+            valid_xs[valid_x_index],
+            valid_ys[valid_y_index],
+        );
+
+        let food_index = self.get_index(self.food.0, self.food.1);
+
+        self.cells[food_index] = Cell::On;
+    }
+
+    fn move_snake_tail(&mut self) {
+        let snake_tail = self.snake.pop_back().unwrap();
+        let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
+        self.cells[snake_tail_index] = Cell::Off;
+    }
+
+    fn move_snake_head(&mut self) {
+        let snake_head = self.snake.get(0).unwrap();
+
+        let new_snake_head = match self.direction {
+            Direction::Up => (
+                snake_head.0,
+                (snake_head.1 - 1) % self.height,
+            ),
+            Direction::Down => (
+                snake_head.0,
+                (snake_head.1 + 1) % self.height,
+            ),
+            Direction::Right => (
+                (snake_head.0 + 1) % self.width,
+                snake_head.1,
+            ),
+            Direction::Left => (
+                (snake_head.0 - 1) % self.width,
+                snake_head.1,
+            ),
+        };
+
+        let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
+
+        self.cells[new_snake_head_index] = Cell::On;
+
+        self.snake.push_front(new_snake_head);
+    }
 }
 
 impl Direction {
@@ -81,8 +139,6 @@ impl Direction {
 #[wasm_bindgen]
 impl Game {
     pub fn tick(&mut self, direction: Direction) {
-
-        let snake_head = self.snake.get(0).unwrap().clone();
 
         if self.is_over() {
             let mut snake = VecDeque::new();
@@ -116,66 +172,19 @@ impl Game {
             return;
         }
 
-        let mut next = self.cells.clone();
-
         if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
             self.direction = direction;
         }
 
-        if snake_head == self.food {
+        self.move_snake_head();
 
-            let exclude_x:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
-            let exclude_y:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
+        let old_snake_head = self.snake.get(1).unwrap();
 
-            let width:IndexSet<u32> = (0..self.width).collect();
-            let height:IndexSet<u32> = (0..self.height).collect();
-
-            let valid_x:IndexSet<u32> = width.difference(&exclude_x).cloned().collect();
-            let valid_y:IndexSet<u32> = height.difference(&exclude_y).cloned().collect();
-
-            let valid_x_index = rand::thread_rng().gen_range(0..valid_x.len());
-            let valid_y_index = rand::thread_rng().gen_range(0..valid_y.len());
-
-            self.food = (
-                valid_x[valid_x_index],
-                valid_y[valid_y_index],
-            );
-
-            let food_index = self.get_index(self.food.0, self.food.1);
-
-            next[food_index] = Cell::On;
+        if *old_snake_head != self.food {
+            self.move_snake_tail();
         } else {
-            let snake_tail = self.snake.pop_back().unwrap();
-            let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
-            next[snake_tail_index] = Cell::Off;
+            self.process_food();
         }
-
-        let new_snake_head = match self.direction {
-            Direction::Up => (
-                snake_head.0,
-                (snake_head.1 - 1) % self.height,
-            ),
-            Direction::Down => (
-                snake_head.0,
-                (snake_head.1 + 1) % self.height,
-            ),
-            Direction::Right => (
-                (snake_head.0 + 1) % self.width,
-                snake_head.1,
-            ),
-            Direction::Left => (
-                (snake_head.0 - 1) % self.width,
-                snake_head.1,
-            ),
-        };
-
-        let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
-
-        next[new_snake_head_index] = Cell::On;
-
-        self.snake.push_front(new_snake_head);
-
-        self.cells = next;
     }
 
     pub fn new() -> Game {
