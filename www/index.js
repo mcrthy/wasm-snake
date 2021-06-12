@@ -10,6 +10,8 @@ const HEIGHT = 64;
 const WIDTH = 64;
 const STARTING_DIRECTION = Direction.up;
 
+let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
+
 const canvas = document.getElementById("snake-canvas");
 canvas.height = (CELL_SIZE + 1) * HEIGHT + 1;
 canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
@@ -43,7 +45,7 @@ const drawCells = () => {
 
   for (let row = 0; row < HEIGHT; row++) {
     for (let col = 0; col < WIDTH; col++) {
-      const idx = getIndex(row, col);
+      const idx = game.get_index(col, row);
 
       ctx.fillStyle = cells[idx] === Cell.Off
         ? OFF_COLOR
@@ -61,11 +63,11 @@ const drawCells = () => {
   ctx.stroke();
 };
 
-const getIndex = (row, column) => {
-  return row * WIDTH + column;
-};
+// const getIndex = (row, column) => {
+//   return row * WIDTH + column;
+// };
 
-let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
+
 let direction = STARTING_DIRECTION;
 
 window.addEventListener('keydown', (e) => {

@@ -43,18 +43,14 @@ pub enum Direction {
 pub struct Game {
     width: u32,
     height: u32,
+    points: IndexSet<(u32, u32)>,
     snake: VecDeque<(u32,u32)>,
     food: (u32, u32),
     direction: Direction,
     cells: Vec<Cell>,
-    points: IndexSet<(u32, u32)>,
 }
 
 impl Game {
-    fn get_index(&self, col: u32, row: u32) -> usize {
-        (row * self.width + col) as usize
-    }
-
     fn process_food(&mut self) {
         let excluded_points:IndexSet<(u32, u32)> = self.snake.iter()
         .map( |(x,y)| {
@@ -63,11 +59,11 @@ impl Game {
 
         let possible_points:IndexSet<(u32, u32)> = self.points.difference(&excluded_points).cloned().collect();
 
-        let valid_food_location = rand::thread_rng().gen_range(0..possible_points.len());
-        self.food = possible_points[valid_food_location];
+        let random_idx = rand::thread_rng().gen_range(0..possible_points.len());
+        self.food = possible_points[random_idx];
 
-        let food_index = self.get_index(self.food.0, self.food.1);
-        self.cells[food_index] = Cell::On;
+        let food_idx = self.get_index(self.food.0, self.food.1);
+        self.cells[food_idx] = Cell::On;
     }
 
     fn move_snake_tail(&mut self) {
@@ -145,13 +141,22 @@ impl Game {
         hittable_segment.contains(&head)
     }
 
+    pub fn get_index(&self, col: u32, row: u32) -> usize {
+        (row * self.width + col) as usize
+    }
+
     pub fn new(width: u32, height: u32, direction: Direction) -> Game {
         utils::set_panic_hook();
+
+        let points:IndexSet<(u32, u32)> = (0..width).cartesian_product(0..height).collect();
 
         let snake_starting_point = (
             (width - 1) / 2,
             (height - 1) / 2,
         );
+
+        let mut snake = VecDeque::new();
+        snake.push_back(snake_starting_point);
         
         let food = (
             rand::thread_rng().gen_range(0..width),
@@ -168,20 +173,15 @@ impl Game {
                 }
             })
             .collect();
-        
-        let points:IndexSet<(u32, u32)> = (0..width).cartesian_product(0..height).collect();
-        
-        let mut snake = VecDeque::new();
-        snake.push_back(snake_starting_point);
 
         Game {
             width,
             height,
+            points,
             snake,
             food,
             direction,
             cells,
-            points,
         }
     }
 
