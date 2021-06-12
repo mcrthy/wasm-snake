@@ -10,8 +10,6 @@ const HEIGHT = 64;
 const WIDTH = 64;
 const STARTING_DIRECTION = Direction.up;
 
-const game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
-
 const canvas = document.getElementById("snake-canvas");
 canvas.height = (CELL_SIZE + 1) * HEIGHT + 1;
 canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
@@ -35,10 +33,6 @@ const drawGrid = () => {
   }
 
   ctx.stroke();
-};
-
-const getIndex = (row, column) => {
-  return row * WIDTH + column;
 };
 
 const drawCells = () => {
@@ -67,7 +61,12 @@ const drawCells = () => {
   ctx.stroke();
 };
 
-let direction = game.direction();
+const getIndex = (row, column) => {
+  return row * WIDTH + column;
+};
+
+let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
+let direction = STARTING_DIRECTION;
 
 window.addEventListener('keydown', (e) => {
   if (e.key == 'w') {
@@ -82,10 +81,14 @@ window.addEventListener('keydown', (e) => {
 })
 
 const renderLoop = () => {
-  game.tick(direction);
+  if (game.is_over()) {
+    game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
+  }
 
   drawGrid();
   drawCells();
+
+  game.tick(direction);
 
   setTimeout( () => requestAnimationFrame(renderLoop), 100);
 };

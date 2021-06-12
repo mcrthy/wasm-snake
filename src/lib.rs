@@ -54,19 +54,7 @@ impl Game {
         (row * self.width + col) as usize
     }
 
-    fn is_over(&self) -> bool {
-        if self.snake.len() <= 4 {
-            return false;
-        }
-
-        let hittable_segment:Vec<&(u32, u32)> = self.snake.range(4..).collect();
-        let head:&(u32, u32) = self.snake.get(0).unwrap();
-
-        hittable_segment.contains(&head)
-    }
-
     fn process_food(&mut self) {
-
         let excluded_xs:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
         let excluded_ys:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
 
@@ -137,41 +125,6 @@ impl Direction {
 #[wasm_bindgen]
 impl Game {
     pub fn tick(&mut self, direction: Direction) {
-
-        if self.is_over() {
-            let mut snake = VecDeque::new();
-
-            // set in middle
-            snake.push_back((
-                (self.width - 1) / 2,
-                (self.height - 1) / 2,
-            ));
-            
-            // set randomly
-            let food = (
-                10,
-                10,
-            );
-
-            let cells = (0..self.width * self.height)
-            .map(|i| {
-                if i == (snake.get(0).unwrap().1 * self.width + snake.get(0).unwrap().0) 
-                || i == (food.1 * self.width + food.0) {
-                    Cell::On
-                } else {
-                    Cell::Off
-                }
-            })
-            .collect();
-
-            self.snake = snake;
-            self.food = food;
-            self.direction = Direction::Up;
-            self.cells = cells;
-
-            return;
-        }
-
         if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
             self.direction = direction;
         }
@@ -185,6 +138,17 @@ impl Game {
         } else {
             self.process_food();
         }
+    }
+
+    pub fn is_over(&self) -> bool {
+        if self.snake.len() <= 4 {
+            return false;
+        }
+
+        let hittable_segment:Vec<&(u32, u32)> = self.snake.range(4..).collect();
+        let head = self.snake.get(0).unwrap();
+
+        hittable_segment.contains(&head)
     }
 
     pub fn new(width: u32, height: u32, direction: Direction) -> Game {
