@@ -4,6 +4,8 @@ use wasm_bindgen::prelude::*;
 use rand::Rng;
 use std::collections::VecDeque;
 use indexmap::IndexSet;
+use cgmath::Vector2;
+
 
 extern crate web_sys;
 
@@ -51,6 +53,17 @@ impl Game {
     fn get_index(&self, col: u32, row: u32) -> usize {
         (row * self.width + col) as usize
     }
+
+    fn is_over(&self) -> bool {
+        if self.snake.len() <= 4 {
+            return false;
+        }
+
+        let hittable_segment:VecDeque<&(u32, u32)> = self.snake.range(4..).collect();
+        let head:&(u32, u32) = self.snake.get(0).unwrap();
+
+        hittable_segment.contains(&head)
+    }
 }
 
 impl Direction {
@@ -71,8 +84,7 @@ impl Game {
 
         let snake_head = self.snake.get(0).unwrap().clone();
 
-        if self.snake.len() > 4 && self.snake.range(4..).cloned().collect::<VecDeque<_>>().contains(&snake_head) {
-
+        if self.is_over() {
             let mut snake = VecDeque::new();
 
             snake.push_back((
