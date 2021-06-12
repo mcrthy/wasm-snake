@@ -59,13 +59,14 @@ impl Game {
             return false;
         }
 
-        let hittable_segment:VecDeque<&(u32, u32)> = self.snake.range(4..).collect();
+        let hittable_segment:Vec<&(u32, u32)> = self.snake.range(4..).collect();
         let head:&(u32, u32) = self.snake.get(0).unwrap();
 
         hittable_segment.contains(&head)
     }
 
     fn process_food(&mut self) {
+
         let excluded_xs:IndexSet<u32> = self.snake.iter().map( |(x, _)| { *x }).collect();
         let excluded_ys:IndexSet<u32> = self.snake.iter().map( |(_, y)| { *y }).collect();
 
@@ -84,7 +85,6 @@ impl Game {
         );
 
         let food_index = self.get_index(self.food.0, self.food.1);
-
         self.cells[food_index] = Cell::On;
     }
 
@@ -117,9 +117,7 @@ impl Game {
         };
 
         let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
-
         self.cells[new_snake_head_index] = Cell::On;
-
         self.snake.push_front(new_snake_head);
     }
 }
@@ -143,11 +141,13 @@ impl Game {
         if self.is_over() {
             let mut snake = VecDeque::new();
 
+            // set in middle
             snake.push_back((
                 (self.width - 1) / 2,
                 (self.height - 1) / 2,
             ));
             
+            // set randomly
             let food = (
                 10,
                 10,
@@ -187,27 +187,22 @@ impl Game {
         }
     }
 
-    pub fn new() -> Game {
+    pub fn new(width: u32, height: u32, direction: Direction) -> Game {
         utils::set_panic_hook();
 
-        let width: u32 = 64;
-        let height: u32 = 64;
-
-        let mut snake = VecDeque::new();
-
-        snake.push_back((
+        let snake_starting_point = (
             (width - 1) / 2,
             (height - 1) / 2,
-        ));
+        );
         
         let food = (
-            10,
-            10,
+            rand::thread_rng().gen_range(0..width),
+            rand::thread_rng().gen_range(0..height),
         );
 
         let cells = (0..width * height)
             .map(|i| {
-                if i == (snake.get(0).unwrap().1 * width + snake.get(0).unwrap().0) 
+                if i == (snake_starting_point.1 * width + snake_starting_point.0) 
                 || i == (food.1 * width + food.0) {
                     Cell::On
                 } else {
@@ -215,13 +210,16 @@ impl Game {
                 }
             })
             .collect();
+        
+        let mut snake = VecDeque::new();
+        snake.push_back(snake_starting_point);
 
         Game {
             width,
             height,
             snake,
             food,
-            direction: Direction::Up,
+            direction,
             cells,
         }
     }

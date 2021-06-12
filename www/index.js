@@ -6,14 +6,15 @@ const GRID_COLOR = "#CCCCCC";
 const OFF_COLOR = "#FFFFFF";
 const ON_COLOR = "#000000";
 
-// Construct the universe, and get its width and height.
-const game = Game.new();
-const width = game.width();
-const height = game.height();
+const HEIGHT = 64;
+const WIDTH = 64;
+const STARTING_DIRECTION = Direction.up;
+
+const game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
 
 const canvas = document.getElementById("snake-canvas");
-canvas.height = (CELL_SIZE + 1) * height + 1;
-canvas.width = (CELL_SIZE + 1) * width + 1;
+canvas.height = (CELL_SIZE + 1) * HEIGHT + 1;
+canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
 
 const ctx = canvas.getContext('2d');
 
@@ -22,32 +23,32 @@ const drawGrid = () => {
   ctx.strokeStyle = GRID_COLOR;
 
   // Vertical lines.
-  for (let i = 0; i <= width; i++) {
+  for (let i = 0; i <= WIDTH; i++) {
     ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-    ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
+    ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * HEIGHT + 1);
   }
 
   // Horizontal lines.
-  for (let j = 0; j <= height; j++) {
+  for (let j = 0; j <= HEIGHT; j++) {
     ctx.moveTo(0,                           j * (CELL_SIZE + 1) + 1);
-    ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
+    ctx.lineTo((CELL_SIZE + 1) * WIDTH + 1, j * (CELL_SIZE + 1) + 1);
   }
 
   ctx.stroke();
 };
 
 const getIndex = (row, column) => {
-  return row * width + column;
+  return row * WIDTH + column;
 };
 
 const drawCells = () => {
   const cellsPtr = game.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+  const cells = new Uint8Array(memory.buffer, cellsPtr, WIDTH * HEIGHT);
 
   ctx.beginPath();
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
+  for (let row = 0; row < HEIGHT; row++) {
+    for (let col = 0; col < WIDTH; col++) {
       const idx = getIndex(row, col);
 
       ctx.fillStyle = cells[idx] === Cell.Off
