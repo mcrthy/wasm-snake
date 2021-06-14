@@ -10,6 +10,7 @@ use itertools::Itertools;
 extern crate web_sys;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
+// NOTE: Repeatedly logging from Rust to the browser console will significantly slow the app down.
 macro_rules! log {
     ( $( $t:tt )* ) => {
         web_sys::console::log_1(&format!( $( $t )* ).into());
@@ -23,14 +24,6 @@ macro_rules! log {
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Cell {
-    Off = 0,
-    On = 1,
-}
-
-#[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq)]
 pub enum Direction {
     Up,
@@ -41,35 +34,29 @@ pub enum Direction {
 
 #[wasm_bindgen]
 pub struct Game {
-    width: u32,
-    height: u32,
-    points: IndexSet<(u32, u32)>,
-    snake: VecDeque<(u32,u32)>,
-    food: (u32, u32),
+    width: u8,
+    height: u8,
+    points: IndexSet<(u8, u8)>,
+    snake: VecDeque<(u8, u8)>,
+    food: (u8, u8),
     direction: Direction,
-    cells: Vec<Cell>,
 }
 
 impl Game {
     fn process_food(&mut self) {
-        let excluded_points:IndexSet<(u32, u32)> = self.snake.iter()
+        let excluded_points:IndexSet<(u8, u8)> = self.snake.iter()
         .map( |(x,y)| {
             (*x, *y)
         }).collect();
 
-        let possible_points:IndexSet<(u32, u32)> = self.points.difference(&excluded_points).cloned().collect();
+        let possible_points:IndexSet<(u8, u8)> = self.points.difference(&excluded_points).cloned().collect();
 
         let random_idx = rand::thread_rng().gen_range(0..possible_points.len());
         self.food = possible_points[random_idx];
-
-        let food_idx = self.get_index(self.food.0, self.food.1);
-        self.cells[food_idx] = Cell::On;
     }
 
     fn move_snake_tail(&mut self) {
-        let snake_tail = self.snake.pop_back().unwrap();
-        let snake_tail_index = self.get_index(snake_tail.0, snake_tail.1);
-        self.cells[snake_tail_index] = Cell::Off;
+        self.snake.pop_back();
     }
 
     fn move_snake_head(&mut self) {
@@ -94,8 +81,6 @@ impl Game {
             ),
         };
 
-        let new_snake_head_index = self.get_index(new_snake_head.0, new_snake_head.1);
-        self.cells[new_snake_head_index] = Cell::On;
         self.snake.push_front(new_snake_head);
     }
 }
@@ -135,20 +120,21 @@ impl Game {
             return false;
         }
 
-        let hittable_segment:Vec<&(u32, u32)> = self.snake.range(4..).collect();
+        let hittable_segment:Vec<&(u8, u8)> = self.snake.range(4..).collect();
         let head = self.snake.get(0).unwrap();
 
         hittable_segment.contains(&head)
     }
 
-    pub fn get_index(&self, col: u32, row: u32) -> usize {
-        (row * self.width + col) as usize
+    pub fn is_occupied(&self, row: u8, col: u8) -> bool {
+        let point = (col, row);
+        self.snake.contains(&point) || self.food == point
     }
 
-    pub fn new(width: u32, height: u32, direction: Direction) -> Game {
+    pub fn new(width: u8, height: u8, direction: Direction) -> Game {
         utils::set_panic_hook();
 
-        let points:IndexSet<(u32, u32)> = (0..width).cartesian_product(0..height).collect();
+        let points:IndexSet<(u8, u8)> = (0..width).cartesian_product(0..height).collect();
 
         let snake_starting_point = (
             (width - 1) / 2,
@@ -163,17 +149,6 @@ impl Game {
             rand::thread_rng().gen_range(0..height),
         );
 
-        let cells = (0..width * height)
-            .map(|i| {
-                if i == (snake_starting_point.1 * width + snake_starting_point.0) 
-                || i == (food.1 * width + food.0) {
-                    Cell::On
-                } else {
-                    Cell::Off
-                }
-            })
-            .collect();
-
         Game {
             width,
             height,
@@ -181,23 +156,18 @@ impl Game {
             snake,
             food,
             direction,
-            cells,
         }
     }
 
-    pub fn width(&self) -> u32 {
+    pub fn width(&self) -> u8 {
         self.width
     }
 
-    pub fn height(&self) -> u32 {
+    pub fn height(&self) -> u8 {
         self.height
     }
 
     pub fn direction(&self) -> Direction {
         self.direction
-    }
-
-    pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
     }
 }

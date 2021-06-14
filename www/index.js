@@ -38,18 +38,13 @@ const drawGrid = () => {
 };
 
 const drawCells = () => {
-  const cellsPtr = game.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, WIDTH * HEIGHT);
-
   ctx.beginPath();
 
   for (let row = 0; row < HEIGHT; row++) {
     for (let col = 0; col < WIDTH; col++) {
-      const idx = game.get_index(col, row);
-
-      ctx.fillStyle = cells[idx] === Cell.Off
-        ? OFF_COLOR
-        : ON_COLOR;
+      ctx.fillStyle = game.is_occupied(row, col)
+        ? ON_COLOR
+        : OFF_COLOR;
 
       ctx.fillRect(
         col * (CELL_SIZE + 1) + 1,
@@ -62,11 +57,6 @@ const drawCells = () => {
 
   ctx.stroke();
 };
-
-// const getIndex = (row, column) => {
-//   return row * WIDTH + column;
-// };
-
 
 let direction = STARTING_DIRECTION;
 
