@@ -114,8 +114,8 @@ impl Game {
             return false;
         }
 
-        let hittable_segment:Vec<&(u8, u8)> = self.snake.range(4..).collect();
-        let head = self.snake.get(0).unwrap();
+        let hittable_segment:Vec<(u8, u8)> = self.snake.range(4..).cloned().collect();
+        let head = self.snake.get(0).unwrap().clone();
 
         hittable_segment.contains(&head)
     }
