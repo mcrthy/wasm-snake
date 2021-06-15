@@ -55,10 +55,6 @@ impl Game {
         self.food = possible_points[random_idx];
     }
 
-    fn move_snake_tail(&mut self) {
-        self.snake.pop_back();
-    }
-
     fn move_snake_head(&mut self) {
         let snake_head = self.snake.get(0).unwrap().clone();
 
@@ -107,7 +103,7 @@ impl Game {
         let old_snake_head = self.snake.get(1).unwrap();
 
         if *old_snake_head != self.food {
-            self.move_snake_tail();
+            self.snake.pop_back();
         } else {
             self.process_food();
         }
