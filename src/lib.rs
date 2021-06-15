@@ -134,13 +134,11 @@ impl Game {
 
         let points:IndexSet<(u8, u8)> = (0..width).cartesian_product(0..height).collect();
 
-        let snake_starting_point = (
+        let mut snake = VecDeque::new();
+        snake.push_back((
             (width - 1) / 2,
             (height - 1) / 2,
-        );
-
-        let mut snake = VecDeque::new();
-        snake.push_back(snake_starting_point);
+        ));
         
         let food = (
             rand::thread_rng().gen_range(0..width),
