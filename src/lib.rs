@@ -60,9 +60,9 @@ impl Game {
     }
 
     fn move_snake_head(&mut self) {
-        let snake_head = self.snake.get(0).unwrap();
+        let snake_head = self.snake.get_mut(0).unwrap().clone();
 
-        let new_snake_head = match self.direction {
+        self.snake.push_front(match self.direction {
             Direction::Up => (
                 snake_head.0,
                 (snake_head.1 - 1) % self.height,
@@ -79,9 +79,7 @@ impl Game {
                 (snake_head.0 - 1) % self.width,
                 snake_head.1,
             ),
-        };
-
-        self.snake.push_front(new_snake_head);
+        });
     }
 }
 
