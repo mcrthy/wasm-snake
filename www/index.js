@@ -1,13 +1,13 @@
 import { Cell, Direction, Game } from "wasm-snake";
 import { memory } from "wasm-snake/wasm_snake_bg";
 
-const CELL_SIZE = 5; // px
+const CELL_SIZE = 10; // px
 const GRID_COLOR = "#CCCCCC";
 const OFF_COLOR = "#FFFFFF";
 const ON_COLOR = "#000000";
 
-const HEIGHT = 64;
-const WIDTH = 64;
+const HEIGHT = 32;
+const WIDTH = 32;
 const STARTING_DIRECTION = Direction.up;
 
 let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
