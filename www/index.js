@@ -1,5 +1,4 @@
-import { Cell, Direction, Game } from "wasm-snake";
-import { memory } from "wasm-snake/wasm_snake_bg";
+import { Direction, Game } from "wasm-snake";
 
 const CELL_SIZE = 10; // px
 const GRID_COLOR = "#CCCCCC";
@@ -9,6 +8,53 @@ const FOOD_COLOR = "#FF0000";
 
 const HEIGHT = 32;
 const WIDTH = 32;
+
+const INTERVAL = 100; // 100 ms animation interval
+
+const fps = new class {
+  constructor() {
+    this.fps = document.getElementById("fps");
+    this.frames = [];
+    this.lastFrameTimeStamp = performance.now();
+  }
+
+  render() {
+    // Convert the delta time since the last frame render into a measure
+    // of frames per second.
+    const now = performance.now();
+    const delta = now - this.lastFrameTimeStamp;
+    this.lastFrameTimeStamp = now;
+    const fps = 1 / delta * 1000;
+
+    // Save only the latest 100 timings.
+    this.frames.push(fps);
+    if (this.frames.length > 100) {
+      this.frames.shift();
+    }
+
+    // Find the max, min, and mean of our 100 latest timings.
+    let min = Infinity;
+    let max = -Infinity;
+    let sum = 0;
+    for (let i = 0; i < this.frames.length; i++) {
+      sum += this.frames[i];
+      min = Math.min(this.frames[i], min);
+      max = Math.max(this.frames[i], max);
+    }
+    let mean = sum / this.frames.length;
+
+    // Render the statistics.
+    this.fps.textContent = `
+Frames per Second:
+         latest = ${Math.round(fps)}
+avg of last 100 = ${Math.round(mean)}
+min of last 100 = ${Math.round(min)}
+max of last 100 = ${Math.round(max)}
+`.trim();
+  }
+};
+
+
 const STARTING_DIRECTION = Direction.up;
 
 let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
@@ -97,7 +143,13 @@ window.addEventListener('keydown', (e) => {
   }
 })
 
-const renderLoop = () => {
+var frame = {
+  start: null,
+  delta: null,
+  count: 0,
+};
+
+const progressGame = () => {
   if (game.is_over()) {
     setBestScore();
     game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
@@ -109,8 +161,20 @@ const renderLoop = () => {
   drawCells();
 
   game.tick(direction);
+}
 
-  setTimeout( () => requestAnimationFrame(renderLoop), 100);
-};
+const run = (func) => {
+  if (!frame.start) frame.start = performance.now();
+  frame.delta = performance.now() - frame.start;
 
-requestAnimationFrame(renderLoop);
+  fps.render();
+
+  if (frame.delta >= INTERVAL) {
+    func.call();
+    frame.start = null;
+  }
+
+  requestAnimationFrame(run.bind(null, func));
+}
+
+run(progressGame);
