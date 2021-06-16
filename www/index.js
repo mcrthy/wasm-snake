@@ -13,7 +13,10 @@ const STARTING_DIRECTION = Direction.up;
 
 let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
 
-const scoreboard = document.getElementById("scoreboard");
+let bestScore = 0;
+
+const currentScoreText = document.getElementById("current-score");
+const bestScoreText = document.getElementById("best-score");
 
 const canvas = document.getElementById("snake-canvas");
 canvas.height = (CELL_SIZE + 1) * HEIGHT + 1;
@@ -21,9 +24,19 @@ canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
 
 const ctx = canvas.getContext('2d');
 
-const setScore = () => {
-  scoreboard.innerHTML = "Score: " + game.score();
+const setCurrentScore = () => {
+  currentScoreText.innerHTML = "Current: " + game.score();
 }
+
+const setBestScore = () => {
+  let score = game.score();
+  if (score >= bestScore) {
+    bestScore = score;
+    bestScoreText.innerHTML = "Best: " + bestScore;
+  }
+}
+
+setBestScore();
 
 const drawGrid = () => {
   ctx.beginPath();
@@ -86,10 +99,11 @@ window.addEventListener('keydown', (e) => {
 
 const renderLoop = () => {
   if (game.is_over()) {
+    setBestScore();
     game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
   }
 
-  setScore();
+  setCurrentScore();
 
   drawGrid();
   drawCells();

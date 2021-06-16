@@ -15,10 +15,16 @@
         align-items: center;
         justify-content: center;
       }
+      #scoreboard {
+        display: flex;
+      }
     </style>
   </head>
   <body>
-    <div id="scoreboard"></div>
+    <div id="scoreboard">
+      <div id="best-score"></div>
+      <div id="current-score"></div>
+    </div>
     <canvas id="snake-canvas"></canvas>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
