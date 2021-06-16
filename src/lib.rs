@@ -40,6 +40,7 @@ pub struct Game {
     snake: VecDeque<(u8, u8)>,
     food: (u8, u8),
     direction: Direction,
+    score: u16,
 }
 
 impl Game {
@@ -53,6 +54,8 @@ impl Game {
 
         let random_idx = rand::thread_rng().gen_range(0..possible_points.len());
         self.food = possible_points[random_idx];
+
+        self.score += 1;
     }
 
     fn move_snake_head(&mut self) {
@@ -151,6 +154,7 @@ impl Game {
             snake,
             food,
             direction,
+            score: 0,
         }
     }
 
@@ -162,7 +166,7 @@ impl Game {
         self.height
     }
 
-    pub fn direction(&self) -> Direction {
-        self.direction
+    pub fn score(&self) -> u16 {
+        self.score
     }
 }

@@ -13,11 +13,17 @@ const STARTING_DIRECTION = Direction.up;
 
 let game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
 
+const scoreboard = document.getElementById("scoreboard");
+
 const canvas = document.getElementById("snake-canvas");
 canvas.height = (CELL_SIZE + 1) * HEIGHT + 1;
 canvas.width = (CELL_SIZE + 1) * WIDTH + 1;
 
 const ctx = canvas.getContext('2d');
+
+const setScore = () => {
+  scoreboard.innerHTML = "Score: " + game.score();
+}
 
 const drawGrid = () => {
   ctx.beginPath();
@@ -82,6 +88,8 @@ const renderLoop = () => {
   if (game.is_over()) {
     game = Game.new(WIDTH, HEIGHT, STARTING_DIRECTION);
   }
+
+  setScore();
 
   drawGrid();
   drawCells();
