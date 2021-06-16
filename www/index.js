@@ -146,7 +146,6 @@ window.addEventListener('keydown', (e) => {
 var frame = {
   start: null,
   delta: null,
-  count: 0,
 };
 
 const progressGame = () => {
