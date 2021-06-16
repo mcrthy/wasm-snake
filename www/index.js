@@ -9,8 +9,6 @@ const FOOD_COLOR = "#FF0000";
 const HEIGHT = 32;
 const WIDTH = 32;
 
-const INTERVAL = 100; // 100 ms animation interval
-
 const fps = new class {
   constructor() {
     this.fps = document.getElementById("fps");
@@ -143,11 +141,6 @@ window.addEventListener('keydown', (e) => {
   }
 })
 
-var frame = {
-  start: null,
-  delta: null,
-};
-
 const progressGame = () => {
   if (game.is_over()) {
     setBestScore();
@@ -161,6 +154,13 @@ const progressGame = () => {
 
   game.tick(direction);
 }
+
+const INTERVAL = 100; // 100 ms animation interval
+
+let frame = {
+  start: null,
+  delta: null,
+};
 
 const run = (func) => {
   if (!frame.start) frame.start = performance.now();
