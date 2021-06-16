@@ -4,7 +4,8 @@ import { memory } from "wasm-snake/wasm_snake_bg";
 const CELL_SIZE = 10; // px
 const GRID_COLOR = "#CCCCCC";
 const OFF_COLOR = "#FFFFFF";
-const ON_COLOR = "#000000";
+const SNAKE_COLOR = "#000000";
+const FOOD_COLOR = "#FF0000";
 
 const HEIGHT = 32;
 const WIDTH = 32;
@@ -42,9 +43,14 @@ const drawCells = () => {
 
   for (let row = 0; row < HEIGHT; row++) {
     for (let col = 0; col < WIDTH; col++) {
-      ctx.fillStyle = game.is_occupied(row, col)
-        ? ON_COLOR
-        : OFF_COLOR;
+      
+      if (game.is_snake(row, col)) {
+        ctx.fillStyle = SNAKE_COLOR;
+      } else if (game.is_food(row, col)) {
+        ctx.fillStyle = FOOD_COLOR;
+      } else {
+        ctx.fillStyle = OFF_COLOR;
+      }
 
       ctx.fillRect(
         col * (CELL_SIZE + 1) + 1,

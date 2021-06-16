@@ -120,9 +120,12 @@ impl Game {
         hittable_segment.contains(&head)
     }
 
-    pub fn is_occupied(&self, row: u8, col: u8) -> bool {
-        let point = (col, row);
-        self.snake.contains(&point) || self.food == point
+    pub fn is_food(&self, row: u8, col: u8) -> bool {
+        self.food == (col, row)
+    }
+
+    pub fn is_snake(&self, row: u8, col: u8) -> bool {
+        self.snake.contains(&(col, row))
     }
 
     pub fn new(width: u8, height: u8, direction: Direction) -> Game {
