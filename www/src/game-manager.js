@@ -1,4 +1,5 @@
 import { Game } from "wasm-snake";
+import { Animator } from "./animator";
 import CONFIG from './config';
 import { Controller } from './controller';
 import { View } from "./view";
@@ -9,6 +10,7 @@ export class GameManager {
 
     this.view = new View();
     this.controller = new Controller();
+    this.animator = new Animator();
 
     this.frame = {
       start: null,
@@ -34,21 +36,8 @@ export class GameManager {
     this.view.render(this.game);
     this.game.tick(this.controller.direction);
   }
-
-  animate(func) {
-    if (!this.frame.start) this.frame.start = performance.now();
-    this.frame.delta = performance.now() - this.frame.start;
-    
-    if (this.frame.delta >= CONFIG.INTERVAL) {
-      func.call();
-      this.frame.start = null;
-    }
-
-    // TODO: Refactor....too much this
-    requestAnimationFrame(this.animate.bind(this, func.bind(this)));
-  }
-
+  
   run() {
-    this.animate(this.tick);
+    this.animator.animate(this.tick.bind(this));
   }
 }

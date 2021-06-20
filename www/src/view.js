@@ -13,7 +13,6 @@ export class View {
   }
 
   setBestScore(score) {
-    const score = this.game.score();
     const bestScore = localStorage.getItem('bestScore');
 
     if (score >= bestScore) {
