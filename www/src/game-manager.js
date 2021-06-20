@@ -3,22 +3,20 @@ import CONFIG from './config';
 import { Controller } from './controller';
 import { View } from "./view";
 
-
 export class GameManager {
   constructor() {
-    this.restart();
+    this.startNewGame();
+
+    this.view = new View();
+    this.controller = new Controller();
 
     this.frame = {
       start: null,
       delta: null,
     }
-
-    this.view = new View();
-
-    this.controller = new Controller();
   }
 
-  restart() {
+  startNewGame() {
     this.game = Game.new(
       CONFIG.WIDTH,
       CONFIG.HEIGHT,
@@ -29,13 +27,11 @@ export class GameManager {
   tick() {
     if (this.game.is_over()) {
       this.view.setBestScore(this.game.score());
-      this.restart();
+      this.startNewGame();
     }
   
     this.view.setCurrentScore(this.game.score());
-
     this.view.render(this.game);
-  
     this.game.tick(this.controller.direction);
   }
 

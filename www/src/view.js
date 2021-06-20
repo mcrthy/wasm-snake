@@ -1,5 +1,4 @@
 import CONFIG from './config';
-import { Game } from "wasm-snake"
 
 export class View {
   constructor() {
@@ -14,7 +13,7 @@ export class View {
   }
 
   setBestScore(score) {
-    // const score = this.game.score();
+    const score = this.game.score();
     const bestScore = localStorage.getItem('bestScore');
 
     if (score >= bestScore) {
