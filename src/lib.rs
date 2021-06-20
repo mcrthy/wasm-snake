@@ -96,9 +96,13 @@ impl Direction {
 
 #[wasm_bindgen]
 impl Game {
-    pub fn tick(&mut self, direction: Direction) {
-        if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
-            self.direction = direction;
+    pub fn tick(&mut self, direction: Option<Direction>) {
+        if direction.is_some() {
+            let direction = direction.unwrap();
+
+            if self.snake.len() == 1 || !self.direction.is_opposite(direction) {
+                self.direction = direction;
+            }
         }
 
         self.move_snake_head();
