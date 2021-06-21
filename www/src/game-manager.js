@@ -19,7 +19,7 @@ export class GameManager {
   }
 
   startNewGame() {
-    this.game = Game.new(
+    this.game = new Game(
       CONFIG.WIDTH,
       CONFIG.HEIGHT,
       CONFIG.DIRECTION,

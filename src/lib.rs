@@ -96,6 +96,34 @@ impl Direction {
 
 #[wasm_bindgen]
 impl Game {
+    #[wasm_bindgen(constructor)]
+    pub fn new(width: u8, height: u8, direction: Direction) -> Game {
+        utils::set_panic_hook();
+
+        let points:IndexSet<(u8, u8)> = (0..width).cartesian_product(0..height).collect();
+
+        let mut snake = VecDeque::new();
+        snake.push_back((
+            (width - 1) / 2,
+            (height - 1) / 2,
+        ));
+        
+        let food = (
+            rand::thread_rng().gen_range(0..width),
+            rand::thread_rng().gen_range(0..height),
+        );
+
+        Game {
+            width,
+            height,
+            points,
+            snake,
+            food,
+            direction,
+            score: 0,
+        }
+    }
+    
     pub fn tick(&mut self, direction: Option<Direction>) {
         if direction.is_some() {
             let direction = direction.unwrap();
@@ -133,33 +161,6 @@ impl Game {
 
     pub fn is_snake(&self, row: u8, col: u8) -> bool {
         self.snake.contains(&(col, row))
-    }
-
-    pub fn new(width: u8, height: u8, direction: Direction) -> Game {
-        utils::set_panic_hook();
-
-        let points:IndexSet<(u8, u8)> = (0..width).cartesian_product(0..height).collect();
-
-        let mut snake = VecDeque::new();
-        snake.push_back((
-            (width - 1) / 2,
-            (height - 1) / 2,
-        ));
-        
-        let food = (
-            rand::thread_rng().gen_range(0..width),
-            rand::thread_rng().gen_range(0..height),
-        );
-
-        Game {
-            width,
-            height,
-            points,
-            snake,
-            food,
-            direction,
-            score: 0,
-        }
     }
 
     pub fn width(&self) -> u8 {
