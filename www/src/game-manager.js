@@ -11,11 +11,6 @@ export class GameManager {
     this.view = new View();
     this.controller = new Controller();
     this.animator = new Animator();
-
-    this.frame = {
-      start: null,
-      delta: null,
-    }
   }
 
   startNewGame() {
